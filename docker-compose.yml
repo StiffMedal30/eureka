@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  eureka:
+    image: steeltoeoss/eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      EUREKA_CLIENT_REGISTERWITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCHREGISTRY: "false"
+      EUREKA_SERVER_ENABLESELFPRESERVATION: "false"
+      SPRING_APPLICATION_NAME: "discovery-server"
+    networks:
+      - app-network
+    restart: always
+
+  auth-service:
+    image: auth-service  # Replace with your actual Auth Service image name
+    container_name: auth-service
+    depends_on:
+      - eureka
+    ports:
+      - "8082:8082"  # Auth service accessible on this port
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_SERVER=http://eureka-server:8761/eureka
+    networks:
+      - app-network
+    restart: always
+
+  api-gateway:
+    image: gateway  # Replace with your actual API Gateway image name
+    container_name: api-gateway
+    depends_on:
+      - eureka
+      - auth-service
+    ports:
+      - "8081:8081"  # API Gateway accessible on this port
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_SERVER=http://eureka-server:8761/eureka
+    networks:
+      - app-network
+    restart: always
+
+networks:
+  app-network:
+    driver: bridge
