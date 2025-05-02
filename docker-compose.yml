@@ -15,6 +15,27 @@ services:
       - app-network
     restart: always
 
+  config-server:
+    image: config-server
+    container_name: config-server
+    depends_on:
+      - eureka
+    ports:
+      - "7090:7090"
+    environment:
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_JWT_SECRET=${DB_JWT_SECRET}
+      - DB_URL_USERS=${DB_URL_USERS}
+#    volumes:
+#      - ./common-config:/config-repo
+
+    networks:
+      - app-network
+    restart: always
+
 networks:
   app-network:
     driver: bridge
+
+
